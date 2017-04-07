@@ -39,7 +39,25 @@ const float RES_DIV = 100000;
 const float CAL_SLOPE = 2155.5;
 const float CAL_INTERCEPT = -0.5659;
 
+//Coefficient values for force sensor 1 calibration curve y = 73127x2 + 522.77x + 1.6106
+const float CAL_S1_A2 = 73127;
+const float CAL_S1_A1 = 522.77;
+const float CAL_S1_A0 = 1.6106;
 
+//Coefficient values for force sensor 2 calibration curve y = 44736x2 + 959.5x + 0.6082
+const float CAL_S2_A2 = 44736;
+const float CAL_S2_A1 = 959.5;
+const float CAL_S2_A0 = 0.6082;
+
+//Coefficient values for force sensor 3 calibration curve y = 44853x2 + 368.39x + 1.7637
+const float CAL_S3_A2 = 44853;
+const float CAL_S3_A1 = 368.39;
+const float CAL_S3_A0 = 1.7637;
+
+//Coefficient values for force sensor 4 calibration curve y = 28395x2 + 792.43x + 0.6379
+const float CAL_S4_A2 = 28395;
+const float CAL_S4_A1 = 792.43;
+const float CAL_S4_A0 = 0.6379;
 
 
 //******************************************************
@@ -111,27 +129,33 @@ void loop()
 
   // Use the raw analog force to calculate voltage
   float v1 = calcVoltage(rawForce1);
-//  float v2 = calcVoltage(rawForce2);
-//  float v3 = calcVoltage(rawForce3);
-//  float v4 = calcVoltage(rawForce4);
+  float v2 = calcVoltage(rawForce2);
+  float v3 = calcVoltage(rawForce3);
+  float v4 = calcVoltage(rawForce4);
 
   // Use the voltage to calculate resistance
   float r1 = calcResistance(v1);
-//  float r2 = calcResistance(v2);
-//  float r3 = calcResistance(v3);
-//  float r4 = calcResistance(v4);
+  float r2 = calcResistance(v2);
+  float r3 = calcResistance(v3);
+  float r4 = calcResistance(v4);
+
+  //These print statements are for Calibration only
+  //Serial.println(r1);
+  //Serial.println(r2);
+  //Serial.println(r3);
+  //Serial.println(r4);
 
   // Use the resistance to calculate the force in pounds
-  float force1 = calcForce(r1);
-//  float force2 = calcForce(r2);
-//  float force3 = calcForce(r3);
-//  float force4 = calcForce(r4);
+  float force1 = calcForce1(r1);
+  float force2 = calcForce2(r2);
+  float force3 = calcForce3(r3);
+  float force4 = calcForce4(r4);
 
   // Print out all information to Serial Monitor
   Serial.println(printForce(force1));
-//  Serial.println(printForce(force2));
-//  Serial.println(printForce(force3));
-//  Serial.println(printForce(force4));
+  //Serial.println(printForce(force2));
+  //Serial.println(printForce(force3));
+  //Serial.println(printForce(force4));
 
   // Accelerometer Readings
   int xAccel,yAccel,zAccel;
@@ -154,6 +178,7 @@ void loop()
   {
     Serial.println("ERROR opening data file");
   }
+  
 
   // Sample Rate
   Serial.println();
@@ -180,7 +205,37 @@ float calcResistance(float voltage)
 float calcForce(float resistance)
 {
   float capacitance = 1 / resistance;
-  return ((capacitance * CAL_SLOPE) + CAL_INTERCEPT);
+  //return ((capacitance * CAL_SLOPE) + CAL_INTERCEPT);
+  //polynomial calibration curve y = 57175x2 + 1081x + 0.1808
+  return (CAL_A2 * capacitance*capacitance) + (CAL_A1 * capacitance) + CAL_A0;
+}
+
+float calcForce1(float resistance)
+{
+  float capacitance = 1 / resistance;
+  //polynomial calibration curve y = 73127x2 + 522.77x + 1.6106
+  return (CAL_S1_A2 * capacitance*capacitance) + (CAL_S1_A1 * capacitance) + CAL_S1_A0;
+}
+
+float calcForce2(float resistance)
+{
+  float capacitance = 1 / resistance;
+  //polynomial calibration curve y = 57175x2 + 1081x + 0.1808
+  return (CAL_S2_A2 * capacitance*capacitance) + (CAL_S2_A1 * capacitance) + CAL_S2_A0;
+}
+
+float calcForce3(float resistance)
+{
+  float capacitance = 1 / resistance;
+  //polynomial calibration curve y = 44853x2 + 368.39x + 1.7637
+  return (CAL_S3_A2 * capacitance*capacitance) + (CAL_S3_A1 * capacitance) + CAL_S3_A0;
+}
+
+float calcForce4(float resistance)
+{
+  float capacitance = 1 / resistance;
+  //polynomial calibration curve y = 28395x2 + 792.43x + 0.6379
+  return (CAL_S4_A2 * capacitance*capacitance) + (CAL_S4_A1 * capacitance) + CAL_S4_A0;
 }
 
 
