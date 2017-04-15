@@ -38,9 +38,9 @@ force1 = input{2};
 force2 = input{3};
 force3 = input{4};
 force4 = input{5};
-xAccel = input{6} * G_TO_FT_PER_SEC_SQUARED;
-yAccel = input{7} * G_TO_FT_PER_SEC_SQUARED;
-zAccel = input{8} * G_TO_FT_PER_SEC_SQUARED;
+xAccel = input{6};
+yAccel = input{7};
+zAccel = input{8};
 
 
 
@@ -71,6 +71,30 @@ for i=1:length(force1)
         pushingDownDistance(force1Count) = (force2(i) * LENGTH_BTWN_FSR) / (force1(i) + force2(i));
         
         force1Count = force1Count + 1;
+        
+        % Filter out associated x/y/z accelerations
+        modifiedXAccel(xAccelCount) = xAccel(i);
+        xAccelTime(xAccelCount) = time(i);
+        modifiedYAccel(yAccelCount) = yAccel(i);
+        yAccelTime(yAccelCount) = time(i);
+        modifiedZAccel(zAccelCount) = zAccel(i);
+        zAccelTime(zAccelCount) = time(i);
+        
+        if xAccel(i) > maxXAccel
+            maxXAccel = xAccel(i);
+        end
+        if yAccel(i) > maxYAccel
+            maxYAccel = yAccel(i);
+        end
+        if zAccel(i) > maxZAccel
+            maxZAccel = zAccel(i);
+        end
+        sumOfXAccel = sumOfXAccel + xAccel(i);
+        xAccelCount = xAccelCount + 1;
+        sumOfYAccel = sumOfYAccel + yAccel(i);
+        yAccelCount = yAccelCount + 1;
+        sumOfZAccel = sumOfZAccel + zAccel(i);
+        zAccelCount = zAccelCount + 1;
     end
 
     % Remove zero data for force3 and force4
@@ -82,40 +106,6 @@ for i=1:length(force1)
        pullingOutDistance(force2Count) = (force4(i) * LENGTH_BTWN_FSR) / (force3(i) + force4(i));
 
        force2Count = force2Count + 1;
-    end
-
-    % Remove zero data for accelerations
-    if xAccel(i) >= 0
-        modifiedXAccel(xAccelCount) = xAccel(i);
-        xAccelTime(xAccelCount) = time(i);
-
-        if xAccel(i) > maxXAccel
-            maxXAccel = xAccel(i);
-        end
-        sumOfXAccel = sumOfXAccel + xAccel(i);
-        xAccelCount = xAccelCount + 1;
-    end
-
-    if yAccel(i) >= 0
-        modifiedYAccel(yAccelCount) = yAccel(i);
-        yAccelTime(yAccelCount) = time(i);
-
-        if yAccel(i) > maxYAccel
-            maxYAccel = yAccel(i);
-        end
-        sumOfYAccel = sumOfYAccel + yAccel(i);
-        yAccelCount = yAccelCount + 1;
-    end
-
-    if zAccel(i) >= 0
-        modifiedZAccel(zAccelCount) = zAccel(i);
-        zAccelTime(zAccelCount) = time(i);
-
-        if zAccel(i) > maxZAccel
-            maxZAccel = zAccel(i);
-        end
-        sumOfZAccel = sumOfZAccel + zAccel(i);
-        zAccelCount = zAccelCount + 1;
     end
 end
 

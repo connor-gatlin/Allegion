@@ -14,6 +14,15 @@ long sampleRate = 200;
 // Boolean for sd card
 bool sd = true;
 
+// Accelerometer Calibration Values
+#define offsetX   2       // OFFSET values
+#define offsetY   9.5
+#define offsetZ   -18.5
+
+#define gainX     8.55        // GAIN factors
+#define gainY     8.55
+#define gainZ     7.84 
+
 // All pins connected for force//accel readings
 const int forcePin1 = A0;
 const int forcePin2 = A1; 
@@ -141,12 +150,6 @@ void loop()
   float r3 = calcResistance(v3);
   float r4 = calcResistance(v4);
 
-  //These print statements are for Calibration only
-  //Serial.println(r1);
-  //Serial.println(r2);
-  //Serial.println(r3);
-  //Serial.println(r4);
-
   // Use the resistance to calculate the force in pounds
   float force1 = calcForce1(r1);
   float force2 = calcForce2(r2);
@@ -164,8 +167,14 @@ void loop()
   // Read the accelerometer values and store them in variables declared above x,y,z
   adxl.readAccel(&xAccel, &yAccel, &zAccel);
 
+  // Calculating new calibrated values for x,y,z accelerations
+  int accX = (xAccel - offsetX)/gainX;
+  int accY = (yAccel - offsetY)/gainY;
+  int accZ = (zAccel - offsetZ)/gainZ;
+
+
   // Print Acceleration Values
-  Serial.println(printAccel(xAccel, yAccel, zAccel));
+  Serial.println(printAccel(accX, accY, accZ));
   
 
   // Write to the SD card data file
@@ -173,7 +182,7 @@ void loop()
   dataFile = SD.open("Data.txt", FILE_WRITE);
   if (dataFile)
   {
-    dataFile.println(String(currTime) + "," + String(force1) + "," + String(force2) + "," + String(force3) + "," + String(force4) + "," + printAccel(xAccel, yAccel, zAccel));
+    dataFile.println(String(currTime) + "," + String(force1) + "," + String(force2) + "," + String(force3) + "," + String(force4) + "," + printAccel(accX, accY, accZ));
     dataFile.close();
   }
   else
@@ -261,47 +270,10 @@ void initializeAccelerometer()
   // Accepted values are 2g, 4g, 8g or 16g
   // Higher Values = Wider Measurement Range
   // Lower Values = Greater Sensitivity
-  adxl.setRangeSetting(8);
+  adxl.setRangeSetting(2);
 
   // Configure the device to be in 4 wire SPI mode when set to '0' or 3 wire SPI mode when set to 1
   // Default: Set to 1
   // SPI pins on the ATMega328: 11, 12 and 13 as reference in SPI Library 
   adxl.setSpiBit(0);
-
-  // Set to activate movement detection in the axes "adxl.setActivityXYZ(X, Y, Z);" (1 == ON, 0 == OFF)
-  adxl.setActivityXYZ(1, 0, 0);
-  // 62.5mg per increment   // Set activity   // Inactivity thresholds (0-255)
-  adxl.setActivityThreshold(75);
-
-  // Set to detect inactivity in all the axes "adxl.setInactivityXYZ(X, Y, Z);" (1 == ON, 0 == OFF)
-  adxl.setInactivityXYZ(1, 0, 0);
-  // 62.5mg per increment   // Set inactivity // Inactivity thresholds (0-255)
-  adxl.setInactivityThreshold(75);
-  // How many seconds of no activity is inactive?
-  adxl.setTimeInactivity(10);
-
-  // Detect taps in the directions turned ON "adxl.setTapDetectionOnX(X, Y, Z);" (1 == ON, 0 == OFF)
-  adxl.setTapDetectionOnXYZ(0, 0, 1);
- 
-  // Set values for what is considered a TAP and what is a DOUBLE TAP (0-255)
-  adxl.setTapThreshold(50);           // 62.5 mg per increment
-  adxl.setTapDuration(15);            // 625 μs per increment
-  adxl.setDoubleTapLatency(80);       // 1.25 ms per increment
-  adxl.setDoubleTapWindow(200);       // 1.25 ms per increment
- 
-  // Set values for what is considered FREE FALL (0-255)
-  adxl.setFreeFallThreshold(7);       // (5 - 9) recommended - 62.5mg per increment
-  adxl.setFreeFallDuration(30);       // (20 - 70) recommended - 5ms per increment
- 
-  // Setting all interupts to take place on INT1 pin
-  //adxl.setImportantInterruptMapping(1, 1, 1, 1, 1);     // Sets "adxl.setEveryInterruptMapping(single tap, double tap, free fall, activity, inactivity);" 
-                                                        // Accepts only 1 or 2 values for pins INT1 and INT2. This chooses the pin on the ADXL345 to use for Interrupts.
-                                                        // This library may have a problem using INT2 pin. Default to INT1 pin.
-  
-  // Turn on Interrupts for each mode (1 == ON, 0 == OFF)
-  adxl.InactivityINT(1);
-  adxl.ActivityINT(1);
-  adxl.FreeFallINT(1);
-  adxl.doubleTapINT(1);
-  adxl.singleTapINT(1);
 }
