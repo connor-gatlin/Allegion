@@ -3,12 +3,13 @@
 #include <SD.h>
 #include <Wire.h>
 
+// DESKTOP
 
 //******************************************************
 // Global Variables
 //******************************************************
 // Sample rate of data collection in milliseconds
-long sampleRate = 500;
+long sampleRate = 200;
 
 // Boolean for sd card
 bool sd = true;
@@ -93,6 +94,7 @@ void setup() {
     Serial.println("Initialization done.");
 
     // Open data file for writing
+    SD.remove("Data.txt");
     dataFile = SD.open("Data.txt", FILE_WRITE);
   
     // Ensure that the file opened
@@ -100,11 +102,11 @@ void setup() {
       Serial.print("Writing to Data.txt...");
       
       // Print header row
-      dataFile.println("Time(ms),Force1(Lbs),X-Accel,Y-Accel,Z-Accel");
+      dataFile.println("Time(ms),Force1(Lbs),Force2(Lbs),Force3(Lbs),Force4(Lbs),X-Accel,Y-Accel,Z-Accel");
       dataFile.close();
     } 
     else {
-      Serial.println("ERROR opening test.txt");
+      Serial.println("ERROR opening Data.txt");
     }
   }
 }
@@ -152,10 +154,10 @@ void loop()
   float force4 = calcForce4(r4);
 
   // Print out all information to Serial Monitor
-  Serial.println(printForce(force1));
-  //Serial.println(printForce(force2));
-  //Serial.println(printForce(force3));
-  //Serial.println(printForce(force4));
+  Serial.println("Force 1 = " + printForce(force1));
+  Serial.println("Force 2 = " + printForce(force2));
+  Serial.println("Force 3 = " + printForce(force3));
+  Serial.println("Force 4 = " + printForce(force4));
 
   // Accelerometer Readings
   int xAccel,yAccel,zAccel;
@@ -171,7 +173,7 @@ void loop()
   dataFile = SD.open("Data.txt", FILE_WRITE);
   if (dataFile)
   {
-    dataFile.println(String(currTime) + "," + String(force1) + "," + printAccel(xAccel, yAccel, zAccel));
+    dataFile.println(String(currTime) + "," + String(force1) + "," + String(force2) + "," + String(force3) + "," + String(force4) + "," + printAccel(xAccel, yAccel, zAccel));
     dataFile.close();
   }
   else
@@ -198,16 +200,6 @@ float calcVoltage(float rawForce)
 float calcResistance(float voltage)
 {
   return (((V_INPUT / voltage) - 1) * RES_DIV) / 1000; // Returns resistance in kOhms
-}
-
-
-
-float calcForce(float resistance)
-{
-  float capacitance = 1 / resistance;
-  //return ((capacitance * CAL_SLOPE) + CAL_INTERCEPT);
-  //polynomial calibration curve y = 57175x2 + 1081x + 0.1808
-  return (CAL_A2 * capacitance*capacitance) + (CAL_A1 * capacitance) + CAL_A0;
 }
 
 float calcForce1(float resistance)
@@ -242,14 +234,14 @@ float calcForce4(float resistance)
 
 String printForce(float force)
 {
-   return String(force) + " lbs\n";
+   return String(force) + " lbs";
 }
 
 
 
 String printAccel(float x, float y, float z)
 {
-  return String(x) + "," + String(y) + "," + String(z) + "\n";
+  return String(x) + "," + String(y) + "," + String(z);
 }
 
 

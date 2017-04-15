@@ -5,7 +5,7 @@
 %
 clear all;clc;
 
-[file, path] = uigetfile('*.TXT','Select the Data File');
+[file, path] = uigetfile('*.csv','Select the Data File');
 filename = strcat(path, file);
 
 % Constant Variables
@@ -13,7 +13,7 @@ LENGTH_BTWN_FSR = 4; % Length between force sensors in inches
 LOCK_FSR_TOP_LENGTH = 1.5; % Length between the lock center and force sensor on top of handle in inches
 LOCK_FSR_SIDE_LENGTH = 1.6; % Length between the lock center and force sensor on side of handle in inches
 G_TO_FT_PER_SEC_SQUARED = 32.17; % Conversion factor for g acceleration to ft/s^2
-IN_TO_FT = 0.0833; % Conversion factor for inches to ft
+IN_TO_FT = 0.0833; % Conversion f
 
 
 %-----------------------------
@@ -28,9 +28,6 @@ header = intro{1};
 
 % Read in all line
 input = textscan(file, '%d%f%f%f%f%f%f%f', 'Delimiter', ',');
-
-% Close the file after using
-fclose(file);
 
 % Separate lines into correct data
 time = input{1};
@@ -60,7 +57,7 @@ maxZAccel = 0;
 sumOfXAccel = 0;
 sumOfYAccel = 0;
 sumOfZAccel = 0;
-for i=1:length(force1)
+for i=1:size(force1)
 
     % Remove zero data for force1 and force2
     if force1(i) >= 0 && force2(i) >= 0
@@ -134,7 +131,7 @@ avgZAccel = sumOfZAccel / zAccelCount;
 % and the position of the concentrated force
 % (Use force 1 and force 2)
 pushingForce = modifiedForce1 + modifiedForce2;
-pushingTorque = pushingForce * (LOCK_FSR_TOP_LENGTH);
+pushingTorque = pushingForce * LOCK_FSR_TOP_LENGTH;
 
 maxPushingForce = 0;
 sumOfPushingForce = 0;
@@ -143,7 +140,7 @@ sumOfPushingDistance = 0;
 pushingForceCount = 0;
 maxPushingTorque = 0;
 sumOfPushingTorque = 0;
-for i=1:length(pushingForce)
+for i=1:size(pushingForce)
     if pushingForce(i) > maxPushingForce
         maxPushingForce = pushingForce(i);
     end
@@ -167,7 +164,7 @@ averagePushingTorque = sumOfPushingTorque / pushingForceCount;
 % and the position of the concentrated force
 % (Use force 3 and force 4)
 pullingForce = modifiedForce3 + modifiedForce4;
-pullingTorque = pullingForce * (LOCK_FSR_SIDE_LENGTH);
+pullingTorque = pullingForce * LOCK_FSR_SIDE_LENGTH;
 
 maxPullingForce = 0;
 sumOfPullingForce = 0;
@@ -176,7 +173,7 @@ sumOfPullingDistance = 0;
 maxPullingTorque = 0;
 sumOfPullingTorque = 0;
 pullingForceCount = 0;
-for i=1:length(pullingForce)
+for i=1:size(pullingForce)
     if pullingForce(i) > maxPullingForce
         maxPullingForce = pullingForce(i);
     end
