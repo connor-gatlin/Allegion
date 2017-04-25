@@ -1,0 +1,650 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>DataAnalysis</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-04-15"><meta name="DC.source" content="DataAnalysis.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">%</span>
+<span class="comment">% UCCS Senior Design</span>
+<span class="comment">% Allegion - Lock Testing</span>
+<span class="comment">% Data Analysis</span>
+<span class="comment">%</span>
+clear <span class="string">all</span>;clc;
+
+[file, path] = uigetfile(<span class="string">'*.TXT'</span>,<span class="string">'Select the Data File'</span>);
+filename = strcat(path, file);
+
+<span class="comment">% Constant Variables</span>
+LENGTH_BTWN_FSR = 4; <span class="comment">% Length between force sensors in inches</span>
+LOCK_FSR_TOP_LENGTH = 1.5; <span class="comment">% Length between the lock center and force sensor on top of handle in inches</span>
+LOCK_FSR_SIDE_LENGTH = 1.6; <span class="comment">% Length between the lock center and force sensor on side of handle in inches</span>
+G_TO_FT_PER_SEC_SQUARED = 32.17; <span class="comment">% Conversion factor for g acceleration to ft/s^2</span>
+IN_TO_FT = 0.0833; <span class="comment">% Conversion factor for inches to ft</span>
+
+
+<span class="comment">%-----------------------------</span>
+<span class="comment">%       READ IN DATA</span>
+<span class="comment">%-----------------------------</span>
+<span class="comment">% Open the file</span>
+file = fopen(filename);
+
+<span class="comment">% Read in header line first</span>
+intro = textscan(file,<span class="string">'%s'</span>,1,<span class="string">'Delimiter'</span>,<span class="string">'\n'</span>);
+header = intro{1};
+
+<span class="comment">% Read in all line</span>
+input = textscan(file, <span class="string">'%d%f%f%f%f%f%f%f'</span>, <span class="string">'Delimiter'</span>, <span class="string">','</span>);
+
+<span class="comment">% Close the file after using</span>
+fclose(file);
+
+<span class="comment">% Separate lines into correct data</span>
+time = input{1};
+force1 = input{2};
+force2 = input{3};
+force3 = input{4};
+force4 = input{5};
+xAccel = input{6};
+yAccel = input{7};
+zAccel = input{8};
+
+
+
+<span class="comment">%-----------------------------</span>
+<span class="comment">%       FILTERING DATA</span>
+<span class="comment">%-----------------------------</span>
+
+<span class="comment">% Loop to Remove zero data and calculate averages/maximums of data</span>
+force1Count = 1;
+force2Count = 1;
+xAccelCount = 1;
+yAccelCount = 1;
+zAccelCount = 1;
+maxXAccel = 0;
+maxYAccel = 0;
+maxZAccel = 0;
+sumOfXAccel = 0;
+sumOfYAccel = 0;
+sumOfZAccel = 0;
+<span class="keyword">for</span> i=1:length(force1)
+
+    <span class="comment">% Remove zero data for force1 and force2</span>
+    <span class="keyword">if</span> force1(i) &gt;= 0 &amp;&amp; force2(i) &gt;= 0
+        modifiedForce1(force1Count) = force1(i);
+        modifiedForce2(force1Count) = force2(i);
+        modifiedTime1(force1Count) = time(i);
+
+        pushingDownDistance(force1Count) = (force2(i) * LENGTH_BTWN_FSR) / (force1(i) + force2(i));
+
+        force1Count = force1Count + 1;
+
+        <span class="comment">% Filter out associated x/y/z accelerations</span>
+        modifiedXAccel(xAccelCount) = xAccel(i);
+        xAccelTime(xAccelCount) = time(i);
+        modifiedYAccel(yAccelCount) = yAccel(i);
+        yAccelTime(yAccelCount) = time(i);
+        modifiedZAccel(zAccelCount) = zAccel(i);
+        zAccelTime(zAccelCount) = time(i);
+
+        <span class="keyword">if</span> xAccel(i) &gt; maxXAccel
+            maxXAccel = xAccel(i);
+        <span class="keyword">end</span>
+        <span class="keyword">if</span> yAccel(i) &gt; maxYAccel
+            maxYAccel = yAccel(i);
+        <span class="keyword">end</span>
+        <span class="keyword">if</span> zAccel(i) &gt; maxZAccel
+            maxZAccel = zAccel(i);
+        <span class="keyword">end</span>
+        sumOfXAccel = sumOfXAccel + xAccel(i);
+        xAccelCount = xAccelCount + 1;
+        sumOfYAccel = sumOfYAccel + yAccel(i);
+        yAccelCount = yAccelCount + 1;
+        sumOfZAccel = sumOfZAccel + zAccel(i);
+        zAccelCount = zAccelCount + 1;
+    <span class="keyword">end</span>
+
+    <span class="comment">% Remove zero data for force3 and force4</span>
+    <span class="keyword">if</span> force3(i) &gt;= 0 &amp;&amp; force4(i) &gt;= 0
+       modifiedForce3(force2Count) = force3(i);
+       modifiedForce4(force2Count) = force4(i);
+       modifiedTime2(force2Count) = time(i);
+
+       pullingOutDistance(force2Count) = (force4(i) * LENGTH_BTWN_FSR) / (force3(i) + force4(i));
+
+       force2Count = force2Count + 1;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+
+
+<span class="comment">%-----------------------------</span>
+<span class="comment">%        CALCULATIONS</span>
+<span class="comment">%-----------------------------</span>
+
+<span class="comment">% Calculate average accelerations</span>
+avgXAccel = sumOfXAccel / xAccelCount;
+avgYAccel = sumOfYAccel / yAccelCount;
+avgZAccel = sumOfZAccel / zAccelCount;
+
+<span class="comment">% Calculate the force and torque pushing down on the handle</span>
+<span class="comment">% and the position of the concentrated force</span>
+<span class="comment">% (Use force 1 and force 2)</span>
+pushingForce = modifiedForce1 + modifiedForce2;
+pushingTorque = pushingForce * (LOCK_FSR_TOP_LENGTH);
+
+maxPushingForce = 0;
+sumOfPushingForce = 0;
+maxPushingDistance = 0;
+sumOfPushingDistance = 0;
+pushingForceCount = 0;
+maxPushingTorque = 0;
+sumOfPushingTorque = 0;
+<span class="keyword">for</span> i=1:length(pushingForce)
+    <span class="keyword">if</span> pushingForce(i) &gt; maxPushingForce
+        maxPushingForce = pushingForce(i);
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> pushingDownDistance(i) &gt; maxPushingDistance
+        maxPushingDistance = pushingDownDistance(i);
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> pushingTorque(i) &gt; maxPushingTorque
+        maxPushingTorque = pushingTorque(i);
+    <span class="keyword">end</span>
+    sumOfPushingTorque = sumOfPushingTorque + pushingTorque(i);
+    sumOfPushingDistance = sumOfPushingDistance + pushingDownDistance(i);
+    sumOfPushingForce = sumOfPushingForce + pushingForce(i);
+    pushingForceCount = pushingForceCount + 1;
+<span class="keyword">end</span>
+averagePushingForce = sumOfPushingForce / pushingForceCount;
+averagePushingDistance = sumOfPushingDistance / pushingForceCount;
+averagePushingTorque = sumOfPushingTorque / pushingForceCount;
+
+
+<span class="comment">% Calculate the force and torque pulling out on the handle</span>
+<span class="comment">% and the position of the concentrated force</span>
+<span class="comment">% (Use force 3 and force 4)</span>
+pullingForce = modifiedForce3 + modifiedForce4;
+pullingTorque = pullingForce * (LOCK_FSR_SIDE_LENGTH);
+
+maxPullingForce = 0;
+sumOfPullingForce = 0;
+maxPullingDistance = 0;
+sumOfPullingDistance = 0;
+maxPullingTorque = 0;
+sumOfPullingTorque = 0;
+pullingForceCount = 0;
+<span class="keyword">for</span> i=1:length(pullingForce)
+    <span class="keyword">if</span> pullingForce(i) &gt; maxPullingForce
+        maxPullingForce = pullingForce(i);
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> pullingOutDistance(i) &gt; maxPullingDistance
+        maxPullingDistance = pullingOutDistance(i);
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> pullingTorque(i) &gt; maxPullingTorque
+        maxPullingTorque = pullingTorque(i);
+    <span class="keyword">end</span>
+    sumOfPullingTorque = sumOfPullingTorque + pullingTorque(i);
+    sumOfPullingDistance = sumOfPullingDistance + pullingOutDistance(i);
+    sumOfPullingForce = sumOfPullingForce + pullingForce(i);
+    pullingForceCount = pullingForceCount + 1;
+<span class="keyword">end</span>
+averagePullingForce = sumOfPullingForce / pullingForceCount;
+averagePullingDistance = sumOfPullingDistance / pullingForceCount;
+averagePullingTorque = sumOfPullingTorque / pullingForceCount;
+
+
+<span class="comment">%-----------------------------</span>
+<span class="comment">%         GRAPHING</span>
+<span class="comment">%-----------------------------</span>
+
+<span class="comment">% Graph of the Force pushing down on the handle</span>
+figure(1)
+plot(modifiedTime1, pushingForce)
+xlabel(<span class="string">'Time (s)'</span>)
+ylabel(<span class="string">'Force (lbs)'</span>)
+title(<span class="string">'Force Pushing Down vs. Time'</span>);
+grid <span class="string">on</span>;
+
+<span class="comment">% Graph of the Force pulling out on the handle</span>
+figure(2)
+plot(modifiedTime2, pullingForce)
+xlabel(<span class="string">'Time (s)'</span>)
+ylabel(<span class="string">'Force (lbs)'</span>)
+title(<span class="string">'Force Pulling Out vs. Time'</span>);
+grid <span class="string">on</span>;
+
+<span class="comment">% Graph of the X-Acceleration</span>
+figure(3)
+plot(xAccelTime, modifiedXAccel)
+xlabel(<span class="string">'Time (s)'</span>)
+ylabel(<span class="string">'X-Acceleration ()'</span>)
+title(<span class="string">'X-Acceleration vs. Time'</span>);
+grid <span class="string">on</span>;
+
+<span class="comment">% Graph of the Y-Acceleration</span>
+figure(4)
+plot(yAccelTime, modifiedYAccel)
+xlabel(<span class="string">'Time (s)'</span>)
+ylabel(<span class="string">'Y-Acceleration ()'</span>)
+title(<span class="string">'Y-Acceleration vs. Time'</span>);
+grid <span class="string">on</span>;
+
+<span class="comment">% Graph of the Z-Acceleration</span>
+figure(5)
+plot(zAccelTime, modifiedZAccel)
+xlabel(<span class="string">'Time (s)'</span>)
+ylabel(<span class="string">'Z-Acceleration ()'</span>)
+title(<span class="string">'Z-Acceleration vs. Time'</span>);
+grid <span class="string">on</span>;
+
+
+
+<span class="comment">%-----------------------------</span>
+<span class="comment">%         PRINT DATA</span>
+<span class="comment">%-----------------------------</span>
+
+<span class="comment">% Print out all data analysis results</span>
+fprintf(<span class="string">'\t============================='</span>)
+fprintf(<span class="string">'\n\tPulling Down on Handle:\n'</span>)
+fprintf(<span class="string">'\t=============================\n'</span>)
+fprintf(<span class="string">'\tAverage Force = %.2f Lbs\n'</span>, averagePushingForce);
+fprintf(<span class="string">'\tMaximum Force = %.2f Lbs\n'</span>, maxPushingForce);
+fprintf(<span class="string">'\tAverage Distance = %.2f in\n'</span>, averagePushingDistance);
+fprintf(<span class="string">'\tMaximum Distance = %.2f in\n'</span>, maxPushingDistance);
+fprintf(<span class="string">'\tAverage Torque = %.2f Lbs-in\n'</span>, averagePushingTorque);
+fprintf(<span class="string">'\tMaximum Torque = %.2f Lbs-in\n'</span>, maxPushingTorque);
+
+fprintf(<span class="string">'\n\n'</span>);
+
+fprintf(<span class="string">'\t============================='</span>)
+fprintf(<span class="string">'\n\tPushing Out on Handle:\n'</span>)
+fprintf(<span class="string">'\t=============================\n'</span>)
+fprintf(<span class="string">'\tAverage Force = %.2f Lbs\n'</span>, averagePullingForce);
+fprintf(<span class="string">'\tMaximum Force = %.2f Lbs\n'</span>, maxPullingForce);
+fprintf(<span class="string">'\tAverage Distance = %.2f in\n'</span>, averagePullingDistance);
+fprintf(<span class="string">'\tMaximum Distance = %.2f in\n'</span>, maxPullingDistance);
+fprintf(<span class="string">'\tAverage Torque = %.2f Lbs-in\n'</span>, averagePullingTorque);
+fprintf(<span class="string">'\tMaximum Torque = %.2f Lbs-in\n'</span>, maxPullingTorque);
+
+fprintf(<span class="string">'\n\n'</span>);
+
+fprintf(<span class="string">'\t============================='</span>)
+fprintf(<span class="string">'\n\tAccelerations:\n'</span>)
+fprintf(<span class="string">'\t=============================\n'</span>)
+fprintf(<span class="string">'\tAverage X Accel = %.2f ft/s^2\n'</span>, avgXAccel);
+fprintf(<span class="string">'\tMaximum X Accel = %.2f ft/s^2\n'</span>, maxXAccel);
+fprintf(<span class="string">'\tAverage Y Accel = %.2f ft/s^2\n'</span>, avgYAccel);
+fprintf(<span class="string">'\tMaximum Y Accel = %.2f ft/s^2\n'</span>, maxYAccel);
+fprintf(<span class="string">'\tAverage Z Accel = %.2f ft/s^2\n'</span>, avgZAccel);
+fprintf(<span class="string">'\tMaximum Z Accel = %.2f ft/s^2\n'</span>, maxZAccel);
+</pre><pre class="codeoutput">	=============================
+	Pulling Down on Handle:
+	=============================
+	Average Force = 2.34 Lbs
+	Maximum Force = 4.05 Lbs
+	Average Distance = 1.18 in
+	Maximum Distance = 1.53 in
+	Average Torque = 3.51 Lbs-in
+	Maximum Torque = 6.07 Lbs-in
+
+
+	=============================
+	Pushing Out on Handle:
+	=============================
+	Average Force = 2.51 Lbs
+	Maximum Force = 4.20 Lbs
+	Average Distance = 1.16 in
+	Maximum Distance = 1.80 in
+	Average Torque = 4.01 Lbs-in
+	Maximum Torque = 6.72 Lbs-in
+
+
+	=============================
+	Accelerations:
+	=============================
+	Average X Accel = 3.09 ft/s^2
+	Maximum X Accel = 40.00 ft/s^2
+	Average Y Accel = 16.68 ft/s^2
+	Maximum Y Accel = 43.00 ft/s^2
+	Average Z Accel = 3.53 ft/s^2
+	Maximum Z Accel = 34.00 ft/s^2
+</pre><img vspace="5" hspace="5" src="DataAnalysis_01.png" alt=""> <img vspace="5" hspace="5" src="DataAnalysis_02.png" alt=""> <img vspace="5" hspace="5" src="DataAnalysis_03.png" alt=""> <img vspace="5" hspace="5" src="DataAnalysis_04.png" alt=""> <img vspace="5" hspace="5" src="DataAnalysis_05.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%
+% UCCS Senior Design
+% Allegion - Lock Testing
+% Data Analysis
+%
+clear all;clc;
+
+[file, path] = uigetfile('*.TXT','Select the Data File');
+filename = strcat(path, file);
+
+% Constant Variables
+LENGTH_BTWN_FSR = 4; % Length between force sensors in inches
+LOCK_FSR_TOP_LENGTH = 1.5; % Length between the lock center and force sensor on top of handle in inches
+LOCK_FSR_SIDE_LENGTH = 1.6; % Length between the lock center and force sensor on side of handle in inches
+G_TO_FT_PER_SEC_SQUARED = 32.17; % Conversion factor for g acceleration to ft/s^2
+IN_TO_FT = 0.0833; % Conversion factor for inches to ft
+
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+%       READ IN DATA
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% Open the file
+file = fopen(filename);
+
+% Read in header line first
+intro = textscan(file,'%s',1,'Delimiter','\n');
+header = intro{1};
+
+% Read in all line
+input = textscan(file, '%d%f%f%f%f%f%f%f', 'Delimiter', ',');
+
+% Close the file after using
+fclose(file);
+
+% Separate lines into correct data
+time = input{1};
+force1 = input{2};
+force2 = input{3};
+force3 = input{4};
+force4 = input{5};
+xAccel = input{6};
+yAccel = input{7};
+zAccel = input{8};
+
+
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+%       FILTERING DATA
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+
+% Loop to Remove zero data and calculate averages/maximums of data
+force1Count = 1;
+force2Count = 1;
+xAccelCount = 1;
+yAccelCount = 1;
+zAccelCount = 1;
+maxXAccel = 0;
+maxYAccel = 0;
+maxZAccel = 0;
+sumOfXAccel = 0;
+sumOfYAccel = 0;
+sumOfZAccel = 0;
+for i=1:length(force1)
+
+    % Remove zero data for force1 and force2
+    if force1(i) >= 0 && force2(i) >= 0
+        modifiedForce1(force1Count) = force1(i);
+        modifiedForce2(force1Count) = force2(i);
+        modifiedTime1(force1Count) = time(i);
+        
+        pushingDownDistance(force1Count) = (force2(i) * LENGTH_BTWN_FSR) / (force1(i) + force2(i));
+        
+        force1Count = force1Count + 1;
+        
+        % Filter out associated x/y/z accelerations
+        modifiedXAccel(xAccelCount) = xAccel(i);
+        xAccelTime(xAccelCount) = time(i);
+        modifiedYAccel(yAccelCount) = yAccel(i);
+        yAccelTime(yAccelCount) = time(i);
+        modifiedZAccel(zAccelCount) = zAccel(i);
+        zAccelTime(zAccelCount) = time(i);
+        
+        if xAccel(i) > maxXAccel
+            maxXAccel = xAccel(i);
+        end
+        if yAccel(i) > maxYAccel
+            maxYAccel = yAccel(i);
+        end
+        if zAccel(i) > maxZAccel
+            maxZAccel = zAccel(i);
+        end
+        sumOfXAccel = sumOfXAccel + xAccel(i);
+        xAccelCount = xAccelCount + 1;
+        sumOfYAccel = sumOfYAccel + yAccel(i);
+        yAccelCount = yAccelCount + 1;
+        sumOfZAccel = sumOfZAccel + zAccel(i);
+        zAccelCount = zAccelCount + 1;
+    end
+
+    % Remove zero data for force3 and force4
+    if force3(i) >= 0 && force4(i) >= 0
+       modifiedForce3(force2Count) = force3(i);
+       modifiedForce4(force2Count) = force4(i);
+       modifiedTime2(force2Count) = time(i);
+       
+       pullingOutDistance(force2Count) = (force4(i) * LENGTH_BTWN_FSR) / (force3(i) + force4(i));
+
+       force2Count = force2Count + 1;
+    end
+end
+
+
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+%        CALCULATIONS
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+
+% Calculate average accelerations
+avgXAccel = sumOfXAccel / xAccelCount;
+avgYAccel = sumOfYAccel / yAccelCount;
+avgZAccel = sumOfZAccel / zAccelCount;
+
+% Calculate the force and torque pushing down on the handle
+% and the position of the concentrated force
+% (Use force 1 and force 2)
+pushingForce = modifiedForce1 + modifiedForce2;
+pushingTorque = pushingForce * (LOCK_FSR_TOP_LENGTH);
+
+maxPushingForce = 0;
+sumOfPushingForce = 0;
+maxPushingDistance = 0;
+sumOfPushingDistance = 0;
+pushingForceCount = 0;
+maxPushingTorque = 0;
+sumOfPushingTorque = 0;
+for i=1:length(pushingForce)
+    if pushingForce(i) > maxPushingForce
+        maxPushingForce = pushingForce(i);
+    end
+    if pushingDownDistance(i) > maxPushingDistance
+        maxPushingDistance = pushingDownDistance(i);
+    end
+    if pushingTorque(i) > maxPushingTorque
+        maxPushingTorque = pushingTorque(i);
+    end
+    sumOfPushingTorque = sumOfPushingTorque + pushingTorque(i);
+    sumOfPushingDistance = sumOfPushingDistance + pushingDownDistance(i);
+    sumOfPushingForce = sumOfPushingForce + pushingForce(i);
+    pushingForceCount = pushingForceCount + 1;
+end
+averagePushingForce = sumOfPushingForce / pushingForceCount;
+averagePushingDistance = sumOfPushingDistance / pushingForceCount;
+averagePushingTorque = sumOfPushingTorque / pushingForceCount;
+
+
+% Calculate the force and torque pulling out on the handle
+% and the position of the concentrated force
+% (Use force 3 and force 4)
+pullingForce = modifiedForce3 + modifiedForce4;
+pullingTorque = pullingForce * (LOCK_FSR_SIDE_LENGTH);
+
+maxPullingForce = 0;
+sumOfPullingForce = 0;
+maxPullingDistance = 0;
+sumOfPullingDistance = 0;
+maxPullingTorque = 0;
+sumOfPullingTorque = 0;
+pullingForceCount = 0;
+for i=1:length(pullingForce)
+    if pullingForce(i) > maxPullingForce
+        maxPullingForce = pullingForce(i);
+    end
+    if pullingOutDistance(i) > maxPullingDistance
+        maxPullingDistance = pullingOutDistance(i);
+    end
+    if pullingTorque(i) > maxPullingTorque
+        maxPullingTorque = pullingTorque(i);
+    end
+    sumOfPullingTorque = sumOfPullingTorque + pullingTorque(i);
+    sumOfPullingDistance = sumOfPullingDistance + pullingOutDistance(i);
+    sumOfPullingForce = sumOfPullingForce + pullingForce(i);
+    pullingForceCount = pullingForceCount + 1;
+end
+averagePullingForce = sumOfPullingForce / pullingForceCount;
+averagePullingDistance = sumOfPullingDistance / pullingForceCount;
+averagePullingTorque = sumOfPullingTorque / pullingForceCount;
+
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+%         GRAPHING
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+
+% Graph of the Force pushing down on the handle
+figure(1)
+plot(modifiedTime1, pushingForce)
+xlabel('Time (s)')
+ylabel('Force (lbs)')
+title('Force Pushing Down vs. Time');
+grid on;
+
+% Graph of the Force pulling out on the handle 
+figure(2)
+plot(modifiedTime2, pullingForce)
+xlabel('Time (s)')
+ylabel('Force (lbs)')
+title('Force Pulling Out vs. Time');
+grid on;
+
+% Graph of the X-Acceleration
+figure(3)
+plot(xAccelTime, modifiedXAccel)
+xlabel('Time (s)')
+ylabel('X-Acceleration ()')
+title('X-Acceleration vs. Time');
+grid on;
+
+% Graph of the Y-Acceleration
+figure(4)
+plot(yAccelTime, modifiedYAccel)
+xlabel('Time (s)')
+ylabel('Y-Acceleration ()')
+title('Y-Acceleration vs. Time');
+grid on;
+
+% Graph of the Z-Acceleration
+figure(5)
+plot(zAccelTime, modifiedZAccel)
+xlabel('Time (s)')
+ylabel('Z-Acceleration ()')
+title('Z-Acceleration vs. Time');
+grid on;
+
+
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+%         PRINT DATA
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+
+% Print out all data analysis results
+fprintf('\t=============================')
+fprintf('\n\tPulling Down on Handle:\n')
+fprintf('\t=============================\n')
+fprintf('\tAverage Force = %.2f Lbs\n', averagePushingForce);
+fprintf('\tMaximum Force = %.2f Lbs\n', maxPushingForce);
+fprintf('\tAverage Distance = %.2f in\n', averagePushingDistance);
+fprintf('\tMaximum Distance = %.2f in\n', maxPushingDistance);
+fprintf('\tAverage Torque = %.2f Lbs-in\n', averagePushingTorque);
+fprintf('\tMaximum Torque = %.2f Lbs-in\n', maxPushingTorque);
+
+fprintf('\n\n');
+
+fprintf('\t=============================')
+fprintf('\n\tPushing Out on Handle:\n')
+fprintf('\t=============================\n')
+fprintf('\tAverage Force = %.2f Lbs\n', averagePullingForce);
+fprintf('\tMaximum Force = %.2f Lbs\n', maxPullingForce);
+fprintf('\tAverage Distance = %.2f in\n', averagePullingDistance);
+fprintf('\tMaximum Distance = %.2f in\n', maxPullingDistance);
+fprintf('\tAverage Torque = %.2f Lbs-in\n', averagePullingTorque);
+fprintf('\tMaximum Torque = %.2f Lbs-in\n', maxPullingTorque);
+
+fprintf('\n\n');
+
+fprintf('\t=============================')
+fprintf('\n\tAccelerations:\n')
+fprintf('\t=============================\n')
+fprintf('\tAverage X Accel = %.2f ft/s^2\n', avgXAccel);
+fprintf('\tMaximum X Accel = %.2f ft/s^2\n', maxXAccel);
+fprintf('\tAverage Y Accel = %.2f ft/s^2\n', avgYAccel);
+fprintf('\tMaximum Y Accel = %.2f ft/s^2\n', maxYAccel);
+fprintf('\tAverage Z Accel = %.2f ft/s^2\n', avgZAccel);
+fprintf('\tMaximum Z Accel = %.2f ft/s^2\n', maxZAccel);
+
+
+
+
+##### SOURCE END #####
+--></body></html>

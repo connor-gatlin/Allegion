@@ -3,13 +3,12 @@
 #include <SD.h>
 #include <Wire.h>
 
-// DESKTOP
 
 //******************************************************
 // Global Variables
 //******************************************************
 // Sample rate of data collection in milliseconds
-long sampleRate = 200;
+long sampleRate = 50;
 
 // Boolean for sd card
 bool sd = true;

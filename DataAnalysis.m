@@ -238,7 +238,7 @@ grid on;
 
 % Print out all data analysis results
 fprintf('\t=============================')
-fprintf('\n\tPulling Down on Handle:\n')
+fprintf('\n\tPushing Down on Handle:\n')
 fprintf('\t=============================\n')
 fprintf('\tAverage Force = %.2f Lbs\n', averagePushingForce);
 fprintf('\tMaximum Force = %.2f Lbs\n', maxPushingForce);
@@ -250,7 +250,7 @@ fprintf('\tMaximum Torque = %.2f Lbs-in\n', maxPushingTorque);
 fprintf('\n\n');
 
 fprintf('\t=============================')
-fprintf('\n\tPushing Out on Handle:\n')
+fprintf('\n\tPulling Out on Handle:\n')
 fprintf('\t=============================\n')
 fprintf('\tAverage Force = %.2f Lbs\n', averagePullingForce);
 fprintf('\tMaximum Force = %.2f Lbs\n', maxPullingForce);
