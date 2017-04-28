@@ -8,7 +8,7 @@
 // Global Variables
 //******************************************************
 // Sample rate of data collection in milliseconds
-long sampleRate = 50;
+long sampleRate = 500;
 
 // Boolean for sd card
 bool sd = true;
@@ -48,25 +48,26 @@ const float RES_DIV = 100000;
 const float CAL_SLOPE = 2155.5;
 const float CAL_INTERCEPT = -0.5659;
 
-//Coefficient values for force sensor 1 calibration curve y = 73127x2 + 522.77x + 1.6106
-const float CAL_S1_A2 = 73127;
-const float CAL_S1_A1 = 522.77;
-const float CAL_S1_A0 = 1.6106;
+//Coefficient values for force sensor 1 calibration curve y = 7547.5x2 + 3853.5x - 1.9177
 
-//Coefficient values for force sensor 2 calibration curve y = 44736x2 + 959.5x + 0.6082
-const float CAL_S2_A2 = 44736;
-const float CAL_S2_A1 = 959.5;
-const float CAL_S2_A0 = 0.6082;
+const float CAL_S1_A2 = 7547.5;
+const float CAL_S1_A1 = 3853.5;
+const float CAL_S1_A0 = -1.9177;
 
-//Coefficient values for force sensor 3 calibration curve y = 44853x2 + 368.39x + 1.7637
-const float CAL_S3_A2 = 44853;
-const float CAL_S3_A1 = 368.39;
-const float CAL_S3_A0 = 1.7637;
+//Coefficient values for force sensor 2 calibration curve y = 90536x2 + 1854.6x - 0.062
+const float CAL_S2_A2 = 90536;
+const float CAL_S2_A1 = 1854.6;
+const float CAL_S2_A0 = -0.062;
 
-//Coefficient values for force sensor 4 calibration curve y = 28395x2 + 792.43x + 0.6379
-const float CAL_S4_A2 = 28395;
-const float CAL_S4_A1 = 792.43;
-const float CAL_S4_A0 = 0.6379;
+//Coefficient values for force sensor 3 calibration curve y = 438253x2 + 1138.4x - 1.0086
+const float CAL_S3_A2 = 438253;
+const float CAL_S3_A1 = 1138.4;
+const float CAL_S3_A0 = -1.0086;
+
+//Coefficient values for force sensor 4 calibration curve y = 213766x2 + 2948.8x + 2.0176
+const float CAL_S4_A2 = 213766;
+const float CAL_S4_A1 = 2948.8;
+const float CAL_S4_A0 = 2.0176;
 
 
 //******************************************************
@@ -213,28 +214,28 @@ float calcResistance(float voltage)
 float calcForce1(float resistance)
 {
   float capacitance = 1 / resistance;
-  //polynomial calibration curve y = 73127x2 + 522.77x + 1.6106
+  //polynomial calibration curve y = A2x2 + A1x + A0
   return (CAL_S1_A2 * capacitance*capacitance) + (CAL_S1_A1 * capacitance) + CAL_S1_A0;
 }
 
 float calcForce2(float resistance)
 {
   float capacitance = 1 / resistance;
-  //polynomial calibration curve y = 57175x2 + 1081x + 0.1808
+  //polynomial calibration curve y = A2x2 + A1x + A0
   return (CAL_S2_A2 * capacitance*capacitance) + (CAL_S2_A1 * capacitance) + CAL_S2_A0;
 }
 
 float calcForce3(float resistance)
 {
   float capacitance = 1 / resistance;
-  //polynomial calibration curve y = 44853x2 + 368.39x + 1.7637
+  //polynomial calibration curve y = A2x2 + A1x + A0
   return (CAL_S3_A2 * capacitance*capacitance) + (CAL_S3_A1 * capacitance) + CAL_S3_A0;
 }
 
 float calcForce4(float resistance)
 {
   float capacitance = 1 / resistance;
-  //polynomial calibration curve y = 28395x2 + 792.43x + 0.6379
+  //polynomial calibration curve y = A2x2 + A1x + A0
   return (CAL_S4_A2 * capacitance*capacitance) + (CAL_S4_A1 * capacitance) + CAL_S4_A0;
 }
 
